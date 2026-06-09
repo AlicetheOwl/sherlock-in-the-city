@@ -815,7 +815,7 @@ function showEventBriefing(ev){
     <div class="modal-title" style="font-size:23px;line-height:1.26">${esc(ev.text)}</div>
     ${eff?`<div class="event-callout"><span class="ic">⚙</span><span><span class="et">In effect</span><span class="eb">${esc(eff)}</span></span></div>`:''}
     ${annot}
-    <div class="modal-actions"><button class="btn confirm" onclick="${quiet?'resolveQuietNight()':'runNight()'}">${quiet?'Let them sleep':'Wake the city'}</button></div>`);
+    <div class="modal-actions"><button class="btn confirm" onclick="${quiet?'resolveQuietNight()':'runNight()'}">${quiet?'Let them sleep':'Start the night'}</button></div>`);
 }
 function resolveQuietNight(){
   logEvent('A quiet night. No one acted, no one fell.');
