@@ -415,6 +415,12 @@ input[type=text]:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 1
 .role-card.solo{background:#0c0d10;color:#f1f1f1;border:1px solid var(--steel)}
 .role-card-name{font-family:var(--display);font-size:30px;line-height:1.1}
 .role-card-fac{font-family:var(--type);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.78;margin-top:5px}
+.clue-reminder{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(42,37,32,.22)}
+.clue-reminder-k{font-family:var(--type);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--parch-muted);margin-bottom:7px}
+.clue-reminder-list{display:flex;flex-wrap:wrap;gap:6px}
+.cr-item{font-family:var(--body);font-size:14px;color:var(--parch-ink);background:rgba(42,37,32,.06);border:1px solid rgba(42,37,32,.16);border-radius:3px;padding:4px 9px}
+.cr-item .cr-role{color:var(--parch-muted);font-size:12px}
+.cr-item.out{opacity:.45;text-decoration:line-through}
 
 </style>
 </head>
@@ -454,7 +460,7 @@ const EVENTS = [
   {id:3, title:'Yeast We Could Do', text:"The Baker has run out of yeast! If he doesn't get some urgently, the people of London will be left without his delicious buns by morning! To prevent this, the Baker makes a deal with the Smuggler."},
   {id:4, title:"A Gentleman's Escort", text:"During the evening's performance, Lestrade left Singer a generous tip and walked her home. Tonight, they are both untouchable."},
   {id:5, title:'The Walls Have Ears', text:"The Telephone Operator managed to intercept a government communications channel. In the message being transmitted, she spotted and deciphered the following: the identity of the Terrorist."},
-  {id:6, title:'Fresh Out', text:"The Taxi Driver ran out of prohibited items tonight."},
+  {id:6, title:'Fresh Out', text:"The Taxi Driver ran out of prohibited something tonight."},
   {id:7, title:'Know Thy Enemy', text:"Sherlock stays awake all night trying to figure out who his sworn enemy is. Tonight, he'll get an additional clue about Moriarty's feature."},
   {id:8, title:'The Wrong Wallet', text:"The Pickpocket, without knowing it, stole the wallet of Inspector Lestrade himself, and thanks to this, he learned his identity, but also framed himself."},
   {id:9, title:'Trust no one', text:"Doubts creep into the Boss's mind about the loyalty of his subordinates. He can't trust them, and tonight he acts alone."},
@@ -793,15 +799,15 @@ function launchGame(assignments){
 }
 
 /* ============================================================
-   EVENT MODE — how night events are produced
+   EVENT MODE — how events are produced
    ============================================================ */
 function renderEventMode(){
   $('#app').innerHTML = `
     <header class="masthead">
       <div class="crest">Baker Street · Case Files</div>
       <div class="eyebrow">${state.roster.length} players seated</div>
-      <h1 class="title" style="font-size:clamp(30px,5vw,48px)">How are night events drawn?</h1>
-      <p class="lede">Choose how the deck of night events is produced each night. (Day events come later.) You can run a new case to switch.</p>
+      <h1 class="title" style="font-size:clamp(30px,5vw,48px)">How are events drawn?</h1>
+      <p class="lede">Choose how the event deck is produced. The same choice applies to both night and day cards; you can run a new case to switch.</p>
     </header>
     <div class="method-grid">
       <button class="method-card" onclick="chooseEventMode('manual')">
@@ -925,7 +931,7 @@ function renderGame(){
         </div>
       </div>
       <div>
-        <span class="evt-mode-tag" title="How night events are drawn this case">${state.eventMode==='random'?'🎲 Random events':'🂠 Card events'}</span>
+        <span class="evt-mode-tag" title="How events are drawn this case">${state.eventMode==='random'?'🎲 Random events':'🂠 Card events'}</span>
         ${action} <button class="btn ghost" onclick="confirmRestart()">New case</button>
       </div>
     </div>
@@ -1278,6 +1284,7 @@ function evtStepSherlockExtra(){
     <div class="modal-title">An extra clue about Moriarty</div>
     <p class="modal-instr">Write the additional hint about Moriarty's tell you'll give Sherlock. Shown large so he can read it from across the room.</p>
     <textarea class="clue-input" id="clueInput" placeholder="Moriarty's tell…"></textarea>
+    ${clueReminder('Moriarty', state.roster.filter(r=>r.key==='moriarty'))}
     <div class="modal-actions">
       <button class="btn ghost" onclick="advanceStep()">No extra clue</button>
       <button class="btn confirm" onclick="confirmExtraClue()">Post the clue</button>
@@ -1291,6 +1298,13 @@ function confirmExtraClue(){
 }
 
 const STEP_NO = idx => String(idx).padStart(2,'0');
+
+// reminder list shown under a clue input (host's eyes): who the targets are
+function clueReminder(label, members){
+  if(!members.length) return '';
+  const items = members.map(r=>`<span class="cr-item ${r.alive?'':'out'}">${esc(r.player)} <span class="cr-role">${esc(r.name)}</span></span>`).join('');
+  return `<div class="clue-reminder"><div class="clue-reminder-k">${esc(label)} · reminder for the host</div><div class="clue-reminder-list">${items}</div></div>`;
+}
 
 function stepTaxi(){
   showModal(`
@@ -1452,6 +1466,7 @@ function stepSherlock(){
     <div class="modal-title">Leave a clue</div>
     <p class="modal-instr">Type the deduction Sherlock passes to the table. It will be shown in large type so a player can read it from across the room.</p>
     <textarea class="clue-input" id="clueInput" placeholder="The clue…">${esc(state.latestClue||'')}</textarea>
+    ${clueReminder('The Gang', state.roster.filter(r=>r.faction==='gang'))}
     <div class="modal-actions">
       <button class="btn ghost" onclick="(function(){state.choices.clue=undefined; advanceStep();})()">No clue tonight</button>
       <button class="btn confirm" onclick="confirmSherlock()">Post the clue</button>
