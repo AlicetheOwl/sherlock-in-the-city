@@ -338,11 +338,11 @@ const CHARACTERS = [
   {key:'pickpocket',name:'Pickpocket',         faction:'gang'},
   {key:'sharper',   name:'Sharper',            faction:'gang'},
   {key:'smuggler',  name:'Smuggler',           faction:'gang'},
-  {key:'hacker',    name:'Hacker',             faction:'gang'},
+  {key:'Telephone Operator',    name:'Telephone Operator',             faction:'gang'},
   {key:'moriarty',  name:'Moriarty',           faction:'solo'},
   {key:'terrorist', name:'Terrorist',          faction:'solo'},
 ];
-const GANG_KEYS = ['boss','pickpocket','sharper','smuggler','hacker'];
+const GANG_KEYS = ['boss','pickpocket','sharper','smuggler','Telephone Operator'];
 const FACTION_LABEL = {civilian:'Civilians', gang:'The Gang', solo:'Unaligned'};
 
 /* ---------- event deck (drawn live, marked here) ---------- */
@@ -351,7 +351,7 @@ const EVENTS = [
   {id:2, title:'Whitehall Knows', text:"Last night, the Government received a secret message from an anonymous source. It contained only one sentence: the name of the Terrorist."},
   {id:3, title:'Yeast We Could Do', text:"The Baker has run out of yeast! If he doesn't get some urgently, the people of London will be left without his delicious buns by morning! To prevent this, the Baker makes a deal with the Smuggler."},
   {id:4, title:"A Gentleman's Escort", text:"During the evening's performance, Lestrade left Singer a generous tip and walked her home. Tonight, they are both untouchable."},
-  {id:5, title:'Root Access', text:"The hacker hacked into the government's communications channel and, thanks to this, found out who the Terrorist was."},
+  {id:5, title:'The Walls Have Ears', text:"The Telephone Operator managed to intercept a government communications channel. In the message being transmitted, she spotted and deciphered the following: the identity of the Terrorist."},
   {id:6, title:'Fresh Out', text:"The Taxi Driver ran out of prohibited items tonight."},
   {id:7, title:'Know Thy Enemy', text:"Sherlock stays awake all night trying to figure out who his sworn enemy is. Tonight, he'll get an additional clue about Moriarty's feature."},
   {id:8, title:'The Wrong Wallet', text:"The Pickpocket, without knowing it, stole the wallet of Inspector Lestrade himself, and thanks to this, he learned his identity, but also framed himself."},
@@ -363,14 +363,14 @@ const EVENT_EFFECT = {
   2:"Mycroft (the Government) is told the Terrorist's name.",
   3:"The Baker and the Smuggler are both untouchable tonight.",
   4:"Inspector Lestrade and the Singer are both untouchable tonight.",
-  5:"The Hacker is told the Terrorist's name.",
+  5:"The Telephone Operator is told the Terrorist's name.",
   6:"The Taxi Driver is out of contraband – he doesn't wake tonight.",
   7:"Sherlock gets an extra clue about Moriarty before the roles wake.",
   8:"The Pickpocket learns who Lestrade is; Lestrade learns the Pickpocket is Gang.",
   9:"The Gang's kill is the Boss's alone tonight – if he is dead, the Gang sits out.",
   10:"No one wakes and no one falls.",
 };
-const EVENT_INVOLVED = {1:['hudson'],2:['mycroft','terrorist'],3:['baker','smuggler'],4:['lestrade','singer'],5:['hacker','terrorist'],6:['taxi'],7:['sherlock','moriarty'],8:['pickpocket','lestrade'],9:['boss'],10:[]};
+const EVENT_INVOLVED = {1:['hudson'],2:['mycroft','terrorist'],3:['baker','smuggler'],4:['lestrade','singer'],5:['Telephone Operator','terrorist'],6:['taxi'],7:['sherlock','moriarty'],8:['pickpocket','lestrade'],9:['boss'],10:[]};
 
 let state;
 
@@ -830,7 +830,7 @@ function runNight(){
   // event-driven steps at the start of the night
   if(ev.id===1) q.push('evt_hudson');
   if(ev.id===2) q.push('evt_mycroft');
-  if(ev.id===5) q.push('evt_hacker');
+  if(ev.id===5) q.push('evt_Telephone Operator');
   if(ev.id===7 && isAlive('sherlock')) q.push('evt_sherlock_extra');
   if(ev.id===8) q.push('evt_pickpocket');
   // regular wake order, modified by the event
@@ -850,7 +850,7 @@ function nextNightStep(){
   if(state.nightIdx>=state.nightQueue.length){ closeModal(); resolveNight(); return; }
   const step=state.nightQueue[state.nightIdx];
   ({taxi:stepTaxi, gang:stepGang, moriarty:stepMoriarty, watson:stepWatson, lestrade:stepLestrade, sherlock:stepSherlock,
-    evt_hudson:evtStepHudson, evt_mycroft:evtStepMycroft, evt_hacker:evtStepHacker, evt_sherlock_extra:evtStepSherlockExtra, evt_pickpocket:evtStepPickpocket}[step])();
+    evt_hudson:evtStepHudson, evt_mycroft:evtStepMycroft, evt_Telephone Operator:evtStepTelephone Operator, evt_sherlock_extra:evtStepSherlockExtra, evt_pickpocket:evtStepPickpocket}[step])();
 }
 function advanceStep(){ state.nightIdx++; nextNightStep(); }
 
@@ -872,7 +872,7 @@ function evtStepHudson(){
     <div class="modal-actions"><button class="btn confirm" onclick="advanceStep()">Continue</button></div>`);
 }
 function evtStepMycroft(){ revealTerrorist('Whitehall Knows', 'mycroft', 'Mycroft, the Government'); }
-function evtStepHacker(){ revealTerrorist('Root Access', 'hacker', 'the Hacker'); }
+function evtStepTelephone Operator(){ revealTerrorist('Root Access', 'Telephone Operator', 'the Telephone Operator'); }
 function revealTerrorist(title, recipKey, recipLabel){
   const ter=byKey('terrorist');
   const body = !ter
