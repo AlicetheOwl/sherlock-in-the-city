@@ -107,6 +107,13 @@ input[type=text]:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 1
 .pickrole{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer}
 .pickrole input{width:16px;height:16px;accent-color:var(--brass);flex:none}
 .pickrole-name{font-family:var(--body);font-size:17px;display:flex;align-items:center;gap:8px}
+.pickrole .dot{width:11px;height:11px}
+.pickrole.civilian .dot{background:#f2ecdc;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.pickrole.gang .dot{background:var(--oxblood);box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+.pickrole.solo .dot{background:#000;box-shadow:0 0 0 1px var(--steel)}
+.pickrole.civilian .pickrole-name{color:#f2ecdc}
+.pickrole.gang .pickrole-name{color:#d98785}
+.pickrole.solo .pickrole-name{color:var(--steel)}
 /* random: dealing step */
 .deal-wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;margin-top:18px}
 @media(max-width:720px){.deal-wrap{grid-template-columns:1fr}}
@@ -120,6 +127,12 @@ input[type=text]:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 1
 .dealt-no{font-family:var(--type);font-size:11px;color:var(--brass);min-width:20px}
 .dealt-name{flex:1;color:var(--bone);font-size:16px}
 .dealt-tag{font-family:var(--type);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--safe)}
+.evt-mode-tag{display:inline-block;font-family:var(--type);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-soft);border-radius:2px;padding:4px 8px;margin-right:8px;vertical-align:middle}
+.day-event{display:flex;gap:12px;align-items:flex-start;background:rgba(205,164,52,.08);border:1px solid var(--line-soft);border-left:3px solid var(--brass);border-radius:3px;padding:14px 16px;margin-bottom:14px}
+.day-event-ic{font-size:20px;line-height:1.2;color:var(--brass-soft);flex:none}
+.day-event-body{display:flex;flex-direction:column;gap:3px}
+.day-event-title{font-family:var(--display);font-size:19px;color:var(--brass-soft);letter-spacing:.03em}
+.day-event-text{font-size:14px;color:var(--text);line-height:1.4}
 
 /* ---------- buttons ---------- */
 .btn{
@@ -363,11 +376,11 @@ const CHARACTERS = [
   {key:'pickpocket',name:'Pickpocket',         faction:'gang'},
   {key:'sharper',   name:'Sharper',            faction:'gang'},
   {key:'smuggler',  name:'Smuggler',           faction:'gang'},
-  {key:'Telephone Operator',    name:'Telephone Operator',             faction:'gang'},
+  {key:'hacker',    name:'Telephone Operator',  faction:'gang'},
   {key:'moriarty',  name:'Moriarty',           faction:'solo'},
   {key:'terrorist', name:'Terrorist',          faction:'solo'},
 ];
-const GANG_KEYS = ['boss','pickpocket','sharper','smuggler','Telephone Operator'];
+const GANG_KEYS = ['boss','pickpocket','sharper','smuggler','hacker'];
 const FACTION_LABEL = {civilian:'Civilians', gang:'The Gang', solo:'Unaligned'};
 
 /* ---------- event deck (drawn live, marked here) ---------- */
@@ -395,7 +408,21 @@ const EVENT_EFFECT = {
   9:"The Gang's kill is the Boss's alone tonight – if he is dead, the Gang sits out.",
   10:"No one wakes and no one falls.",
 };
-const EVENT_INVOLVED = {1:['hudson'],2:['mycroft','terrorist'],3:['baker','smuggler'],4:['lestrade','singer'],5:['Telephone Operator','terrorist'],6:['taxi'],7:['sherlock','moriarty'],8:['pickpocket','lestrade'],9:['boss'],10:[]};
+const EVENT_INVOLVED = {1:['hudson'],2:['mycroft','terrorist'],3:['baker','smuggler'],4:['lestrade','singer'],5:['hacker','terrorist'],6:['taxi'],7:['sherlock','moriarty'],8:['pickpocket','lestrade'],9:['boss'],10:[]};
+
+/* ---------- day event deck (drawn at the start of each day) ---------- */
+const DAY_EVENTS = [
+  {id:1, title:'Pitch Black', text:"A pitch-black fog has descended on London. It's so thick that we have to feel our way around. This afternoon the Discussion is being conducted with eyes closed. Anyone who violates this rule will not participate in the Voting."},
+  {id:2, title:'Festival', text:"There is a Festival today! To be heard during the Discussion, you'll have to shout. Anyone who violates this rule will not participate in the Voting."},
+  {id:3, title:'Music to my ears', text:"Sherlock Holmes has been playing his violin since early morning. To maintain the harmony, everybody will have to sing during the Discussion. Anyone who violates this rule will not participate in the Voting."},
+  {id:4, title:'Dog-eat-dog world', text:"Everyone is under suspicion! As a precaution, everyone is handcuffed together. Today's discussion will have to be conducted hand in hand. Anyone who violates this rule will not participate in the Voting."},
+  {id:5, title:'Desired numbers', text:"A telephone operator has promised to reveal the winning lottery numbers as soon as they are received. The line is poor, and even the slightest noise may cause important words to be missed. You must remain silent during today's Discussion and Voting. Anyone who violates this rule will not participate in the Voting."},
+  {id:6, title:'Love and Peace', text:"Today is Peace Day! Executions cannot be carried out on such a significant day. There will be no voting today."},
+  {id:7, title:'Secret Language', text:"Interpol believes criminals have developed a secret language and can communicate even during the day. As a precaution, there will be no Discussion today. Go straight to Voting."},
+  {id:8, title:'God bless the Queen', text:"Today is the Queen's birthday! Everyone is invited to a gala dinner and must polish their manners. During today's Discussion, before making a guess, you must compliment another player. Anyone who violates this rule will not participate in the Voting."},
+  {id:9, title:"Fools' Day", text:"April 1st! During today's Discussion, before making a guess, you must make a funny face. Anyone who violates this rule will not participate in the Voting."},
+  {id:10, title:'Curfew', text:"A mysterious virus is raging in London. Everybody must stay at home to keep safe and sound. Use your hand-phones for today's Discussion. Remember: you can't see each other so gestures will not be helpful. Anyone who violates this rule will not participate in the Voting."},
+];
 
 let state;
 
@@ -403,6 +430,7 @@ function freshState(){
   return {
     screen:'choose',   // 'choose' | 'setup' | 'random-roles' | 'random-deal' | 'game' | 'ended'
     method:null,       // 'cards' | 'random'
+    eventMode:null,    // 'manual' (draw cards, pick from list) | 'random' (console draws)
     draft:{},          // key -> player name (manual setup)
     roster:[],         // active players {key,name,faction,player,alive}
     // random-draw scratch
@@ -421,6 +449,8 @@ function freshState(){
     log:[],
     gameOver:false,
     usedEvents:[],     // ids of events already drawn (removed from the deck)
+    usedDayEvents:[],  // ids of day events already drawn
+    dayEventByRound:{},// round -> {id,title,text} active day event (display only, not in history)
     // transient night
     nightEvent:null,   // {id, skipTaxi, bossAlone, untouchable, quiet}
     nightQueue:[],
@@ -506,7 +536,7 @@ function renderRandomRoles(){
   const sections = groups.map(fac=>{
     const chars=CHARACTERS.filter(c=>c.faction===fac);
     const rows=chars.map(c=>`
-      <label class="pickrole" for="rl-${c.key}">
+      <label class="pickrole ${fac}" for="rl-${c.key}">
         <input type="checkbox" id="rl-${c.key}" ${state.rndSelected.includes(c.key)?'checked':''}
                onchange="toggleRndRole('${c.key}', this.checked)">
         <span class="pickrole-name"><span class="dot ${fac}"></span>${esc(c.name)}</span>
@@ -682,17 +712,48 @@ function startGame(){
   launchGame(assignments);
 }
 
-// Shared by both the cards path and the random draw: build the roster and open the case
+// Shared by both the cards path and the random draw: build the roster, then ask the event mode
 function launchGame(assignments){
   const roster = assignments
     .filter(a=>(a.player||'').trim()!=='')
     .map(a=>{ const c=CHARACTERS.find(x=>x.key===a.key);
               return {key:c.key,name:c.name,faction:c.faction,player:a.player.trim(),alive:true}; });
   state.roster=roster;
+  state.screen='event-mode';
+  render();
+}
+
+/* ============================================================
+   EVENT MODE — how night events are produced
+   ============================================================ */
+function renderEventMode(){
+  $('#app').innerHTML = `
+    <header class="masthead">
+      <div class="crest">Baker Street · Case Files</div>
+      <div class="eyebrow">${state.roster.length} players seated</div>
+      <h1 class="title" style="font-size:clamp(30px,5vw,48px)">How are night events drawn?</h1>
+      <p class="lede">Choose how the deck of night events is produced each night. (Day events come later.) You can run a new case to switch.</p>
+    </header>
+    <div class="method-grid">
+      <button class="method-card" onclick="chooseEventMode('manual')">
+        <span class="method-ic">🂠</span>
+        <span class="method-name">Draw cards live</span>
+        <span class="method-desc">You pull a physical event card and mark it from the list each night. Spent cards drop out.</span>
+      </button>
+      <button class="method-card" onclick="chooseEventMode('random')">
+        <span class="method-ic">🎲</span>
+        <span class="method-name">Digital random</span>
+        <span class="method-desc">The console draws a random night event for you each night, without repeats, and shows the card.</span>
+      </button>
+    </div>`;
+}
+function chooseEventMode(m){
+  state.eventMode=m;
   state.screen='game';
   state.round=1;
   state.phase='night';
-  logEvent('The case opens. '+roster.length+' players take their seats.');
+  logEvent('The case opens. '+state.roster.length+' players take their seats.');
+  logEvent('Night events: '+(m==='random'?'drawn at random by the console.':'drawn live from the card deck.'));
   render();
 }
 
@@ -712,9 +773,12 @@ function renderGame(){
     ? `<div class="bomb-note">⏱ Bomb timer · Day ${state.round} of 5 – detonates at the start of Day 5</div>` : '';
 
   // action button
+  const dayEv = state.dayEventByRound[state.round];
   let action;
   if(state.phase==='night'){
     action = `<button class="btn" onclick="beginNight()">Begin the night</button>`;
+  } else if(dayEv && dayEv.id===6){
+    action = `<button class="btn" onclick="noVoteToNight()">No voting today → next night</button>`;
   } else {
     action = `<button class="btn" onclick="openVote()">Hold the day vote</button>`;
   }
@@ -761,6 +825,18 @@ function renderGame(){
 
   const tracker = buildTracker();
 
+  // active day event, shown above the timeline (display only)
+  let dayBanner = '';
+  if(state.phase==='day' && dayEv){
+    dayBanner = `<div class="day-event">
+      <span class="day-event-ic">☀</span>
+      <div class="day-event-body">
+        <span class="day-event-title">${esc(dayEv.title)}</span>
+        <span class="day-event-text">${esc(dayEv.text)}</span>
+      </div>
+    </div>`;
+  }
+
   const logRows = state.log.length
     ? state.log.map(e=>`<div class="log-row"><span class="log-tag">${esc(e.tag)}</span><span>${esc(e.text)}</span></div>`).join('')
     : `<div class="log-empty">The night is young. Nothing recorded yet.</div>`;
@@ -779,11 +855,15 @@ function renderGame(){
           <div class="phase-title">${state.phase==='night'?'Night '+roman(state.round):'Day '+roman(state.round)}</div>
         </div>
       </div>
-      <div>${action} <button class="btn ghost" onclick="confirmRestart()">New case</button></div>
+      <div>
+        <span class="evt-mode-tag" title="How night events are drawn this case">${state.eventMode==='random'?'🎲 Random events':'🂠 Card events'}</span>
+        ${action} <button class="btn ghost" onclick="confirmRestart()">New case</button>
+      </div>
     </div>
 
     <div class="layout">
       <div>
+        ${dayBanner}
         ${tracker}
         <div class="panel">
           <div class="panel-head"><h2 class="sec">The table</h2><span class="faction-tally" style="font-family:var(--type);font-size:11px;color:var(--muted);letter-spacing:.12em">${alive().length} alive</span></div>
@@ -934,6 +1014,7 @@ function readPick(){
    NIGHT CYCLE
    ============================================================ */
 function beginNight(){
+  if(state.eventMode==='random'){ return drawRandomEvent(); }
   const pool = EVENTS.filter(e=>!state.usedEvents.includes(e.id));
   let list = pool.map(e=>`
     <label class="pick evt-pick">
@@ -957,6 +1038,13 @@ function confirmEvent(){
   if(!el) return;
   const v = el.value==='__none__' ? null : parseInt(el.value,10);
   applyEvent(v);
+}
+// Digital random mode: the console draws a random unused night event (or none if the deck is spent)
+function drawRandomEvent(){
+  const pool = EVENTS.filter(e=>!state.usedEvents.includes(e.id));
+  if(!pool.length){ applyEvent(null); return; }
+  const ev = pool[Math.floor(Math.random()*pool.length)];
+  applyEvent(ev.id);
 }
 function buildEventFlags(ev){
   const f={id:ev.id, skipTaxi:false, bossAlone:false, untouchable:[], quiet:false};
@@ -1005,7 +1093,7 @@ function showEventBriefing(ev){
     <div class="modal-title" style="font-size:23px;line-height:1.26">${esc(ev.text)}</div>
     ${eff?`<div class="event-callout"><span class="ic">⚙</span><span><span class="et">In effect</span><span class="eb">${esc(eff)}</span></span></div>`:''}
     ${annot}
-    <div class="modal-actions"><button class="btn confirm" onclick="${quiet?'resolveQuietNight()':'runNight()'}">${quiet?'Let them sleep':'Wake the city'}</button></div>`);
+    <div class="modal-actions"><button class="btn confirm" onclick="${quiet?'resolveQuietNight()':'runNight()'}">${quiet?'Let them sleep':'Start the Night'}</button></div>`);
 }
 function resolveQuietNight(){
   logEvent('A quiet night. No one acted, no one fell.');
@@ -1020,7 +1108,7 @@ function runNight(){
   // event-driven steps at the start of the night
   if(ev.id===1) q.push('evt_hudson');
   if(ev.id===2) q.push('evt_mycroft');
-  if(ev.id===5) q.push('evt_Telephone Operator');
+  if(ev.id===5) q.push('evt_hacker');
   if(ev.id===7 && isAlive('sherlock')) q.push('evt_sherlock_extra');
   if(ev.id===8) q.push('evt_pickpocket');
   // regular wake order, modified by the event
@@ -1040,7 +1128,7 @@ function nextNightStep(){
   if(state.nightIdx>=state.nightQueue.length){ closeModal(); resolveNight(); return; }
   const step=state.nightQueue[state.nightIdx];
   ({taxi:stepTaxi, gang:stepGang, moriarty:stepMoriarty, watson:stepWatson, lestrade:stepLestrade, sherlock:stepSherlock,
-    evt_hudson:evtStepHudson, evt_mycroft:evtStepMycroft, evt_Telephone Operator:evtStepTelephone Operator, evt_sherlock_extra:evtStepSherlockExtra, evt_pickpocket:evtStepPickpocket}[step])();
+    evt_hudson:evtStepHudson, evt_mycroft:evtStepMycroft, evt_hacker:evtStepHacker, evt_sherlock_extra:evtStepSherlockExtra, evt_pickpocket:evtStepPickpocket}[step])();
 }
 function advanceStep(){ state.nightIdx++; nextNightStep(); }
 
@@ -1062,7 +1150,7 @@ function evtStepHudson(){
     <div class="modal-actions"><button class="btn confirm" onclick="advanceStep()">Continue</button></div>`);
 }
 function evtStepMycroft(){ revealTerrorist('Whitehall Knows', 'mycroft', 'Mycroft, the Government'); }
-function evtStepTelephone Operator(){ revealTerrorist('The Walls Have Ears', 'Telephone Operator', 'the Telephone Operator'); }
+function evtStepHacker(){ revealTerrorist('The Walls Have Ears', 'hacker', 'the Telephone Operator'); }
 function revealTerrorist(title, recipKey, recipLabel){
   const ter=byKey('terrorist');
   const body = !ter
@@ -1377,6 +1465,73 @@ function toDay(){
   // 2) faction outcomes
   if(checkWin()) return;
   render();
+  beginDay();
+}
+
+/* ============================================================
+   DAY EVENTS — drawn at the start of each day (display only)
+   ============================================================ */
+function beginDay(){
+  if(state.eventMode==='random'){ return drawRandomDayEvent(); }
+  const pool = DAY_EVENTS.filter(e=>!state.usedDayEvents.includes(e.id));
+  let list = pool.map(e=>`
+    <label class="pick evt-pick">
+      <input type="radio" name="pick" value="${e.id}">
+      <span class="evt-pick-main"><span class="evt-pick-title">${esc(e.title)}</span><span class="evt-pick-text">${esc(e.text)}</span></span>
+    </label>`).join('');
+  list += `<label class="pick pick-none"><input type="radio" name="pick" value="__none__"><span class="pick-name">No event card today</span></label>`;
+  const note = pool.length ? '' : `<p class="modal-instr">Every day-event card has been drawn. Choose "no event card" for an ordinary day.</p>`;
+  showModal(`
+    <div class="stamp">Day ${roman(state.round)}</div>
+    <div class="step-no">☀</div>
+    <div class="modal-eyebrow">Draw a day event</div>
+    <div class="modal-title">Which card came up?</div>
+    <p class="modal-instr">Pull a day card for real, then mark it here. Spent cards drop off the list.</p>
+    ${note}
+    <div class="picklist evt-list">${list}</div>
+    <div class="modal-actions"><button class="btn confirm" onclick="confirmDayEvent()">This one</button></div>`);
+}
+function confirmDayEvent(){
+  const el=document.querySelector('input[name="pick"]:checked');
+  if(!el) return;
+  const v = el.value==='__none__' ? null : parseInt(el.value,10);
+  applyDayEvent(v);
+}
+function drawRandomDayEvent(){
+  const pool = DAY_EVENTS.filter(e=>!state.usedDayEvents.includes(e.id));
+  if(!pool.length){ applyDayEvent(null); return; }
+  const ev = pool[Math.floor(Math.random()*pool.length)];
+  applyDayEvent(ev.id);
+}
+function applyDayEvent(id){
+  const ev = id ? DAY_EVENTS.find(e=>e.id===id) : null;
+  if(ev){
+    state.usedDayEvents.push(ev.id);
+    state.dayEventByRound[state.round] = {id:ev.id, title:ev.title, text:ev.text};
+    logEvent(`Day event: "${ev.title}".`);
+    showModal(`
+      <div class="stamp">Day event</div>
+      <div class="step-no">☀</div>
+      <div class="modal-eyebrow">${esc(ev.title)}</div>
+      <div class="modal-title" style="font-size:23px;line-height:1.26">${esc(ev.text)}</div>
+      ${ev.id===6?`<div class="event-callout"><span class="ic">⚖</span><span><span class="et">In effect</span><span class="eb">No execution today – the vote is skipped.</span></span></div>`:''}
+      <div class="modal-actions"><button class="btn confirm" onclick="closeDayBriefing()">Read to the table</button></div>`);
+  } else {
+    delete state.dayEventByRound[state.round];
+    closeModal();
+    render();
+  }
+}
+function closeDayBriefing(){ closeModal(); render(); }
+// Love and Peace (#6): no execution – advance straight to the next night
+function noVoteToNight(){
+  logEvent('No voting today (Love and Peace).');
+  state.taxiProtect=null;
+  state.bossShelter=null;
+  if(checkWin()) return;
+  state.round++;
+  state.phase='night';
+  render();
 }
 
 /* ============================================================
@@ -1520,6 +1675,7 @@ function render(){
     case 'setup':        renderSetup(); break;
     case 'random-roles': renderRandomRoles(); break;
     case 'random-deal':  renderRandomDeal(); break;
+    case 'event-mode':   renderEventMode(); break;
     default:             renderGame();
   }
 }
