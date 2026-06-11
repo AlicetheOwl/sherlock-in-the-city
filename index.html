@@ -1810,7 +1810,12 @@ function bombStatus(){
     if(inPlay('terrorist') && isAlive('terrorist')) return {state:'ticking', text:'The bomb is ticking – Day '+roman(state.round)+' of V'};
     return {state:'safe', text:'The city is safe'};
   }
+  // closed terrorist: the threat looms in secret…
   if(state.gameOver) return {state:'hidden', text:''};
+  // …until Day V dawns with no explosion – then the city is openly saved
+  if(state.round>=5 && state.phase==='day' && !isAlive('terrorist')){
+    return {state:'safe', text:'The city was saved from the explosion'};
+  }
   return {state:'ticking', text:'A bomb may be ticking – Day '+roman(state.round)+' of V'};
 }
 function buildAndonTimeline(){
